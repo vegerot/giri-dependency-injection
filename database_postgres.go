@@ -43,6 +43,8 @@ func (D DBConnection) SQL() *gorm.DB {
 	return db
 }
 
+/* ******************************************************************************************************* */
+
 type MySQLDatabase struct {
 	dbconnection *DBConnection
 }
@@ -50,3 +52,5 @@ type MySQLDatabase struct {
 func NewSQLDB(conn DBConnection) *MySQLDatabase {
 	return &MySQLDatabase{dbconnection: &conn}
 }
+
+/* ******************************************************************************************************* */
