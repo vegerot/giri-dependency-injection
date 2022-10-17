@@ -1,6 +1,25 @@
 package main
 
-import "log"
+import (
+	"log"
+	"testing"
+)
+
+func stuff(userRepository UserRepository) (*UserRecord, error) {
+	myUser := UserRecord{
+		UserID: 100,
+		Name:   "Jordan Peterson",
+	}
+
+	userRepository.CreateUser(myUser)
+
+	userData, err := userRepository.GetUserByID(100)
+	if err != nil {
+		return nil, err
+	}
+	return userData, nil
+
+}
 
 func main() {
 
@@ -18,49 +37,26 @@ func main() {
 	userRepository := NewMySQLUserRepository(databasePostgres)
 
 	userRepository.Initialize()
-
-	myUser := UserRecord{
-		UserID: 100,
-		Name:   "Jordan Peterson",
-	}
-
-	userRepository.CreateUser(myUser)
-
-	userData, err := userRepository.GetUserByID(100)
+	userData, err := stuff(userRepository)
 	if err != nil {
-		log.Printf("ERROR : could not fetch user : %v", err.Error())
-		return
+		log.Fatalf("ERROR : could not fetch user : %v", err.Error())
 	}
 	log.Printf("user-id : %v", userData.UserID)
+}
 
-	// -------------- MongoDatabase Operations ---------------------
+func testStuff(t *testing.T) {
+	var mockUserRepository UserRepository /* = ??? */
 
-	// dependency-injection : using MongoDB backend
+	userData, err := stuff(mockUserRepository)
 
-	mongoDBConn := DBMongoConnection{
-		MongoURLHost: "mongodb://mongodb-instance.company.com:27017/",
-		User:         "testuser",
-		Password:     "testpassword",
-	}
-
-	databaseMongo := NewMongoDB(mongoDBConn)
-
-	userRepository = NewMyMongoUserRepository(databaseMongo)
-
-	userRepository.Initialize()
-
-	myUser = UserRecord{
-		UserID: 200,
-		Name:   "Jordan Peterson",
-	}
-
-	userRepository.CreateUser(myUser)
-
-	userData, err = userRepository.GetUserByID(200)
 	if err != nil {
-		log.Printf("ERROR : could not fetch user : %v", err.Error())
-		return
+		t.Fatalf("You fucked up: %#v", err)
 	}
-	log.Printf("user-id : %v", userData.UserID)
 
+	got := userData.UserID
+	const want = 1234
+
+	if got != want {
+		t.Fatalf("got %v, want %v", got, want)
+	}
 }
